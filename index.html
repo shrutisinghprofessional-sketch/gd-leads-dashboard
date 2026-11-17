@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>GD Leads Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600&family=Rubik:wght@400;500;600&display=swap">
+<style>
+  :root { --font-anthropic-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: #F3F9FF; }
+  #dash-root { max-width: 1280px; margin: 0 auto; padding: 16px; }
+  .dash-select { font: inherit; padding: 7px 12px; }
+  .gdx-brand { flex-wrap: wrap; }
+  .gdx-logout { margin-left: auto; font: inherit; font-size: 12px; letter-spacing: .04em; text-transform: none; color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .gdl { min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; font-family: Rubik, var(--font-anthropic-sans);
+    background: radial-gradient(1200px 400px at 85% -10%, rgba(31,188,255,.45), transparent 60%), linear-gradient(115deg, #091C7F 0%, #2E4DB5 55%, #379EFF 120%); }
+  .gdl-card { width: 100%; max-width: 380px; background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 20px 60px rgba(6,26,58,.35); box-sizing: border-box; }
+  .gdl-brand { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #5B6B82; margin: 0 0 8px; }
+  .gdl-brand .gdx-drop { box-shadow: none; background: linear-gradient(135deg, #379EFF, #2E4DB5); }
+  .gdl h1 { font-family: Jost, var(--font-anthropic-sans); font-size: 26px; color: #061A3A; margin: 0 0 20px; font-weight: 600; }
+  .gdl label { display: block; font-size: 13px; color: #5B6B82; margin: 0 0 6px; }
+  .gdl input { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; padding: 11px 12px; border: 1px solid #DCE9F7; border-radius: 12px; margin: 0 0 14px; color: #0F2340; }
+  .gdl input:focus { outline: 2px solid #379EFF; border-color: transparent; }
+  .gdl button { width: 100%; font: inherit; font-size: 15px; font-weight: 600; color: #fff; background: linear-gradient(135deg, #379EFF, #2E4DB5); border: 0; border-radius: 12px; padding: 12px; cursor: pointer; }
+  .gdl button:disabled { opacity: .7; cursor: default; }
+  .gdl-err { color: #E0464E; font-size: 13px; min-height: 18px; margin: 10px 0 0; }
+  .gdl-note { color: #5B6B82; font-size: 12px; margin: 14px 0 0; }
+
+  #dash-root { --dash-gutter: 0; }
+  .gdx { --navy: #061A3A; --royal: #2E4DB5; --deep: #091C7F; --sky: #379EFF; --cyan: #1FBCFF; --aqua: #EEF9FF; --aqua2: #C2E7FB;
+    --ink: #0F2340; --muted: #5B6B82; --line: #DCE9F7; --card: #FFFFFF; --good: #0E9F6E; --bad: #E0464E;
+    font-family: Rubik, var(--font-anthropic-sans); color: var(--ink); background: linear-gradient(180deg, #F3F9FF 0%, #FFFFFF 60%);
+    border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; gap: 28px; padding-bottom: 28px; }
+  .gdx h1, .gdx h2, .gdx .gdx-num { font-family: Jost, var(--font-anthropic-sans); }
+  .gdx-hero { position: relative; padding: 28px 28px 64px; color: #fff;
+    background: radial-gradient(1200px 300px at 85% -10%, rgba(31,188,255,.45), transparent 60%), linear-gradient(115deg, var(--deep) 0%, var(--royal) 55%, var(--sky) 120%); }
+  .gdx-hero::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 48px;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 48' preserveAspectRatio='none'><path d='M0 30 C 200 0 400 48 600 24 C 800 0 1000 44 1200 20 L1200 48 L0 48 Z' fill='%23F3F9FF'/></svg>") center/100% 100% no-repeat; }
+  .gdx-brand { display: flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; margin: 0 0 10px; }
+  .gdx-drop { width: 22px; height: 22px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: linear-gradient(135deg, #fff, var(--cyan)); box-shadow: 0 0 0 4px rgba(255,255,255,.15); }
+  .gdx-hero h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 600; margin: 0 0 10px; line-height: 1.1; }
+  .gdx-lede { font-size: 16px; line-height: 1.55; max-width: 60em; margin: 0 0 14px; color: rgba(255,255,255,.92); }
+  .gdx-lede b { color: #fff; background: rgba(255,255,255,.14); padding: 1px 7px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .gdx-fresh { display: inline-flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12.5px; color: rgba(255,255,255,.8); margin: 0; }
+  .gdx-pulse { width: 8px; height: 8px; border-radius: 50%; background: #5CF2B5; box-shadow: 0 0 0 0 rgba(92,242,181,.6); display: inline-block; margin-right: 6px; }
+  @media (prefers-reduced-motion: no-preference) { .gdx-pulse { animation: gdxpulse 2s infinite; } @keyframes gdxpulse { 70% { box-shadow: 0 0 0 9px rgba(92,242,181,0); } 100% { box-shadow: 0 0 0 0 rgba(92,242,181,0); } } }
+  .gdx-controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 18px; }
+  .gdx-seg { display: inline-flex; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 3px; }
+  .gdx-seg button { font: inherit; font-size: 13px; color: #fff; background: transparent; border: 0; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+  .gdx-seg button.on { background: #fff; color: var(--deep); font-weight: 600; box-shadow: 0 2px 8px rgba(6,26,58,.25); }
+  .gdx-controls .dash-select { background-color: rgba(255,255,255,.95); color: var(--deep); border-radius: 999px; border: 0; font-size: 13px; }
+  .gdx-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); color: #fff; border-radius: 999px; padding: 4px 6px 4px 12px; }
+  .gdx-chip button { font: inherit; font-size: 12px; border: 0; border-radius: 999px; padding: 2px 9px; cursor: pointer; background: #fff; color: var(--deep); }
+  .gdx-body { display: flex; flex-direction: column; gap: 28px; padding: 0 24px; margin-top: -40px; position: relative; z-index: 1; }
+  .gdx-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 14px; }
+  .gdx-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; box-shadow: 0 6px 24px rgba(9,28,127,.07); position: relative; overflow: hidden; }
+  .gdx-tile h3 { font-size: 12.5px; font-weight: 500; color: var(--muted); margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+  .gdx-ico { width: 26px; height: 26px; border-radius: 9px; display: inline-grid; place-items: center; font-size: 13px; color: #fff; background: linear-gradient(135deg, var(--sky), var(--royal)); }
+  .gdx-num { font-size: 30px; font-weight: 600; color: var(--navy); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .gdx-delta { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .gdx-pill { font-variant-numeric: tabular-nums; border-radius: 999px; padding: 2px 8px; background: #EEF2F7; color: var(--muted); font-weight: 600; }
+  .gdx-pill.gd-good { background: #DDF7EC; color: var(--good); } .gdx-pill.gd-bad { background: #FDE6E7; color: var(--bad); }
+  .gdx-spark { position: absolute; right: 10px; top: 12px; width: 76px; height: 30px; opacity: .9; }
+  .gdx-note { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .gdx-sec { display: flex; flex-direction: column; gap: 12px; }
+  .gdx-sec-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 8px 16px; }
+  .gdx-sec h2 { font-size: 21px; font-weight: 600; color: var(--navy); margin: 0; }
+  .gdx-sec h2 span { display: block; font-family: Rubik, var(--font-anthropic-sans); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--sky); font-weight: 500; margin-bottom: 2px; }
+  .gdx-sub { font-size: 13px; color: var(--muted); margin: 0; max-width: 64em; }
+  .gdx-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+  .gdx-chart { position: relative; min-height: 220px; }
+  .gdx-chart.short { min-height: 110px; }
+  .gdx-chart svg { display: block; overflow: visible; }
+  .gdx-chart text { font-size: 11.5px; fill: var(--muted); font-family: Rubik, var(--font-anthropic-sans); }
+  .gdx-chart .lbl-in { fill: #fff; font-weight: 600; }
+  .gdx-chart .lbl-strong { fill: var(--navy); font-weight: 600; }
+  .gdx-chart .grid line { stroke: #E6EFF9; }
+  .gdx-chart .rule { stroke: var(--royal); stroke-dasharray: 3 3; opacity: .6; }
+  .gdx-chart .hit { cursor: pointer; }
+  .gd-tip { position: absolute; pointer-events: none; background: var(--navy); color: #fff; border-radius: 12px; padding: 8px 12px; font-size: 12px; white-space: nowrap; z-index: 5; box-shadow: 0 8px 24px rgba(6,26,58,.3); }
+  .gd-tip div:first-child { font-weight: 600; margin-bottom: 2px; }
+  .gd-tip span { color: #9CC7F5; }
+  .gdx-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin: 0; padding: 0; list-style: none; }
+  .gdx-legend li { display: flex; align-items: center; gap: 6px; }
+  .gd-sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .gdx-wrap { overflow-x: auto; }
+  .gdx-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  .gdx-table th { text-align: right; font-size: 11.5px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .gdx-table td { text-align: right; padding: 9px 10px; border-bottom: 1px solid #EEF4FB; white-space: nowrap; position: relative; }
+  .gdx-table th:first-child, .gdx-table td:first-child { text-align: left; }
+  .gdx-table tbody tr { transition: background .15s; }
+  .gdx-table tbody tr.click { cursor: pointer; }
+  .gdx-table tbody tr.click:hover { background: var(--aqua); }
+  .gdx-table tbody tr.sel { background: #E2F0FF; box-shadow: inset 3px 0 0 var(--sky); }
+  .gdx-table tr.gd-total td { font-weight: 600; color: var(--navy); background: #F6FAFF; }
+  .gdx-bar { display: inline-block; height: 6px; border-radius: 6px; background: linear-gradient(90deg, var(--cyan), var(--royal)); vertical-align: middle; margin-left: 8px; }
+  .gdx-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+  .gdx-av { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; margin-right: 8px; color: #fff; font-size: 11px; font-weight: 600; vertical-align: middle; background: linear-gradient(135deg, var(--sky), var(--royal)); }
+  .gdx-hot { color: var(--bad); font-weight: 600; }
+  .gdx-empty { background: var(--aqua); border: 1px dashed var(--aqua2); border-radius: 14px; padding: 18px; color: var(--muted); margin: 0; font-size: 13.5px; }
+  .gdx-mtog { display: inline-flex; background: #EAF3FD; border-radius: 999px; padding: 3px; }
+  .gdx-mtog button { font: inherit; font-size: 12.5px; border: 0; background: transparent; color: var(--royal); padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+  .gdx-mtog button.on { background: var(--royal); color: #fff; }
+  .gdx details { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 18px; }
+  .gdx details summary { cursor: pointer; font-weight: 600; color: var(--navy); }
+  .gdx details dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 12.5px; margin: 14px 0; }
+  .gdx details dt { font-weight: 600; color: var(--navy); }
+  .gdx details dd { margin: 0; color: var(--muted); }
+  @media (prefers-reduced-motion: no-preference) { .gdx-card { animation: gdxin .5s var(--cds-ease-out, ease-out) both; } @keyframes gdxin { from { opacity: 0; transform: translateY(8px); } } }
+  @media (max-width: 520px) { .gdx-hero { padding: 22px 18px 58px; } .gdx-body { padding: 0 12px; } .gdx-num { font-size: 26px; } }
+</style>
+</head>
+<body>
+<main class="gdl" id="login">
+  <form class="gdl-card" id="login-form" autocomplete="on">
+    <p class="gdl-brand"><span class="gdx-drop"></span>GD Water Consult</p>
+    <h1>Leads Dashboard</h1>
+    <label for="login-user">Username</label>
+    <input id="login-user" name="username" autocomplete="username" required autofocus>
+    <label for="login-pass">Password</label>
+    <input id="login-pass" name="password" type="password" autocomplete="current-password" required>
+    <button type="submit" id="login-btn">Sign in</button>
+    <p class="gdl-err" id="login-err" role="alert"></p>
+    <p class="gdl-note">Data is refreshed every 4 hours.</p>
+  </form>
+</main>
+<div id="dash-root">
+<div id="app" hidden>
+<div class="gdx">
+  <header class="gdx-hero" id="overview">
+    <p class="gdx-brand"><span class="gdx-drop"></span>GD Water Consult · Lead intelligence<button type="button" id="logout" class="gdx-logout">Sign out</button></p>
+    <h1>GD Leads Dashboard</h1>
+    <p class="gdx-lede" id="takeaway">In the period shown, <b data-draw="val" data-source="kpi" data-field="leads" data-row="0" data-fmt="int">—</b> leads came in and <b data-draw="val" data-source="kpi" data-field="sales" data-row="0" data-fmt="int">—</b> became sales (<b data-draw="val" data-source="kpi" data-field="conv" data-row="0" data-fmt="pct">—</b>). Among paid channels, <b data-draw="val" data-source="headline" data-field="best_paid" data-row="0" data-fmt="text">—</b> converts best at <b data-draw="val" data-source="headline" data-field="best_paid_conv" data-row="0" data-fmt="pct">—</b>; <b data-draw="val" data-source="headline" data-field="top_volume" data-row="0" data-fmt="text">—</b> brings the most leads.</p>
+    <p class="gdx-fresh"><span><span class="gdx-pulse"></span>Refreshed every 4 hours from the GD leads sheet</span><span>Last refresh <span data-draw="val" data-source="info" data-field="refreshed" data-row="0" data-fmt="date">—</span>, <span data-draw="val" data-source="info" data-field="refreshed_time" data-row="0" data-fmt="text">—</span></span><span>Newest lead <span data-draw="val" data-source="info" data-field="latest_lead" data-row="0" data-fmt="date">—</span></span></p>
+    <div class="gdx-controls" id="filters">
+      <div class="gdx-seg" role="group" aria-label="Period">
+        <button type="button" data-range="7">7 days</button><button type="button" data-range="15">15 days</button><button type="button" data-range="30">30 days</button><button type="button" data-range="90">90 days</button><button type="button" data-range="all">All time</button>
+      </div>
+      <select class="dash-select" id="f-channel" aria-label="Source">
+        <option value="">All sources</option>
+        <option value="paid">Paid media (Google + Meta)</option>
+        <option value="google">Google Ads (all)</option>
+        <option value="Google Search">Google Search</option>
+        <option value="Google Video">Google Video</option>
+        <option value="Google Demand Gen">Google Demand Gen</option>
+        <option value="Meta">Meta</option>
+        <option value="Incoming call">Incoming call</option>
+        <option value="IndiaMART">IndiaMART</option>
+        <option value="Website">Website</option>
+        <option value="TradeIndia">TradeIndia</option>
+      </select>
+      <span data-draw="filter-chip"></span>
+    </div>
+  </header>
+
+  <div class="gdx-body">
+    <section class="gdx-tiles" id="kpis">
+      <div class="gdx-card gdx-tile" id="kpi-leads"><h3><span class="gdx-ico">◎</span>Leads</h3>
+        <div class="gdx-num" data-draw="val" data-source="kpi" data-field="leads" data-row="0" data-fmt="int">—</div>
+        <svg class="gdx-spark" data-draw="spark" data-key="leads" data-source="weekly" aria-hidden="true"></svg>
+        <div class="gdx-delta"><span class="gdx-pill" data-draw="delta" data-source="kpi" data-field="leads_chg" data-row="0" data-good="up" data-unit="%">—</span><span data-draw="period">—</span></div></div>
+      <div class="gdx-card gdx-tile" id="kpi-contact"><h3><span class="gdx-ico">☎</span>Contact rate</h3>
+        <div class="gdx-num" data-draw="val" data-source="kpi" data-field="contact_rate" data-row="0" data-fmt="pct">—</div>
+        <div class="gdx-delta"><span class="gdx-pill" data-draw="delta" data-source="kpi" data-field="contact_chg_pts" data-row="0" data-good="up" data-unit=" pts">—</span><span data-draw="period">—</span></div></div>
+      <div class="gdx-card gdx-tile" id="kpi-booked"><h3><span class="gdx-ico">✓</span>Visits + sales</h3>
+        <div class="gdx-num" data-draw="val" data-source="kpi" data-field="booked" data-row="0" data-fmt="int">—</div>
+        <div class="gdx-delta"><span class="gdx-pill" data-draw="delta" data-source="kpi" data-field="booked_chg" data-row="0" data-good="up" data-unit="%">—</span><span data-draw="period">—</span></div></div>
+      <div class="gdx-card gdx-tile" id="kpi-sales"><h3><span class="gdx-ico">★</span>Sales confirmed</h3>
+        <div class="gdx-num" data-draw="val" data-source="kpi" data-field="sales" data-row="0" data-fmt="int">—</div>
+        <svg class="gdx-spark" data-draw="spark" data-key="sales" data-source="weekly" aria-hidden="true"></svg>
+        <div class="gdx-delta"><span class="gdx-pill" data-draw="delta" data-source="kpi" data-field="sales_chg" data-row="0" data-good="up" data-unit="%">—</span><span data-draw="period">—</span></div></div>
+      <div class="gdx-card gdx-tile" id="kpi-conv"><h3><span class="gdx-ico">%</span>Lead → sale</h3>
+        <div class="gdx-num" data-draw="val" data-source="kpi" data-field="conv" data-row="0" data-fmt="pct">—</div>
+        <div class="gdx-delta"><span class="gdx-pill" data-draw="delta" data-source="kpi" data-field="conv_chg_pts" data-row="0" data-good="up" data-unit=" pts">—</span><span data-draw="period">—</span></div></div>
+      <div class="gdx-card gdx-tile" id="kpi-revenue"><h3><span class="gdx-ico">₹</span>Sale value</h3>
+        <div class="gdx-num" data-draw="val" data-source="kpi" data-field="revenue_lakh" data-row="0" data-fmt="lakh">—</div>
+        <div class="gdx-delta"><span class="gdx-pill" data-draw="delta" data-source="kpi" data-field="revenue_chg" data-row="0" data-good="up" data-unit="%">—</span><span data-draw="period">—</span></div></div>
+    </section>
+    <p class="gdx-note" id="kpi-note">Contact rate is the share of called leads the team actually got through to. Recent leads are still being worked, so the newest period's sales rate usually climbs over the following weeks. Sparklines show the last 12 weeks.</p>
+
+    <section class="gdx-sec" id="sources">
+      <div class="gdx-sec-h"><h2><span>Paid media</span>Which sources bring sales</h2></div>
+      <p class="gdx-sub">For the chosen period, every source. Click a row to filter the whole dashboard to it. Junk means duplicate, out-of-area, not-catering or enquiry-only leads; repeat means the same phone number enquired on an earlier day.</p>
+      <div class="gdx-card gdx-wrap">
+        <table class="gdx-table" id="source-table" data-source="by_channel" data-row-key="channel">
+          <thead><tr>
+            <th data-field="channel">Source</th><th data-field="leads">Leads</th><th data-field="contact_rate">Contact %</th>
+            <th data-field="booked">Visits + sales</th><th data-field="sales">Sales</th><th data-field="conv">Lead → sale %</th>
+            <th data-field="revenue_lakh">Sale value (₹ L)</th><th data-field="junk_rate">Junk %</th><th data-field="repeat_rate">Repeat %</th>
+          </tr></thead>
+          <tbody data-draw="source-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="gdx-sec" id="trend">
+      <div class="gdx-sec-h">
+        <h2><span>Trend</span>Week by week</h2>
+        <div class="gdx-mtog" role="group" aria-label="Measure"><button type="button" data-metric="leads">Leads</button><button type="button" data-metric="sales">Sales</button><button type="button" data-metric="conv">Lead → sale %</button></div>
+      </div>
+      <div class="gdx-card">
+        <ul class="gdx-legend" id="platform-legend">
+          <li><span class="gd-sw" data-platform="Google Ads"></span>Google Ads</li>
+          <li><span class="gd-sw" data-platform="Meta Ads"></span>Meta Ads</li>
+          <li><span class="gd-sw" data-platform="Non-paid"></span>Non-paid (calls, IndiaMART, website…)</li>
+        </ul>
+        <div class="gdx-chart" id="weekly" data-draw="weekly" data-source="weekly"></div>
+        <p class="gdx-note">All weeks in the sheet, for the chosen source. Sales are counted in the week the lead came in; the latest week is still in progress.</p>
+      </div>
+    </section>
+
+    <section class="gdx-sec" id="status">
+      <div class="gdx-sec-h"><h2><span>Pipeline</span>Where leads stand now, by source</h2></div>
+      <p class="gdx-sub">Current status of leads from the chosen period, as a share of each source's leads. Click a bar to filter to that source.</p>
+      <div class="gdx-card">
+        <ul class="gdx-legend" id="group-legend">
+          <li><span class="gd-sw" data-group="Sale"></span>Sale</li>
+          <li><span class="gd-sw" data-group="Visit / Booked"></span>Visit / booked</li>
+          <li><span class="gd-sw" data-group="Follow-up pending"></span>Follow-up pending</li>
+          <li><span class="gd-sw" data-group="Not reached"></span>Not reached</li>
+          <li><span class="gd-sw" data-group="Lost"></span>Lost</li>
+          <li><span class="gd-sw" data-group="Junk"></span>Junk</li>
+          <li><span class="gd-sw" data-group="Not called yet"></span>Not called yet</li>
+        </ul>
+        <div class="gdx-chart" id="status-mix" data-draw="status-mix" data-source="status_mix"></div>
+      </div>
+    </section>
+
+    <section class="gdx-sec" id="refollow">
+      <div class="gdx-sec-h"><h2><span>Re-follow-ups</span>What happens when status changes</h2></div>
+      <p class="gdx-sub">At each refresh the dashboard compares every lead's status with the start of the day and logs what changed (once per lead per day). Counts are changes seen in the chosen period, for the chosen source.</p>
+      <div class="gdx-tiles">
+        <div class="gdx-card gdx-tile" id="chg-total"><h3><span class="gdx-ico">⇄</span>Status changes logged</h3><div class="gdx-num" data-draw="val" data-source="change_kpi" data-field="changes" data-row="0" data-fmt="int">—</div></div>
+        <div class="gdx-card gdx-tile" id="chg-booked"><h3><span class="gdx-ico">↑</span>Moved to visit or sale</h3><div class="gdx-num" data-draw="val" data-source="change_kpi" data-field="to_booked" data-row="0" data-fmt="int">—</div></div>
+        <div class="gdx-card gdx-tile" id="chg-lost"><h3><span class="gdx-ico">↓</span>Moved to lost or junk</h3><div class="gdx-num" data-draw="val" data-source="change_kpi" data-field="to_lost" data-row="0" data-fmt="int">—</div></div>
+        <div class="gdx-card gdx-tile" id="chg-open"><h3><span class="gdx-ico">…</span>Still open after the change</h3><div class="gdx-num" data-draw="val" data-source="change_kpi" data-field="still_open" data-row="0" data-fmt="int">—</div></div>
+      </div>
+      <p class="gdx-empty" id="changes-empty" hidden>Status tracking started on <span data-draw="val" data-source="info" data-field="tracking_since" data-row="0" data-fmt="date">—</span>. No status changes have been seen yet in this period; they appear here after the next refresh that finds one.</p>
+      <div class="gdx-two" id="changes-wrap">
+        <div class="gdx-card" id="flow">
+          <h3 class="gdx-note">Status flow: where moved leads came from and went</h3>
+          <div class="gdx-chart" data-draw="flow" data-source="transitions"></div>
+        </div>
+        <div class="gdx-card gdx-wrap">
+          <table class="gdx-table" id="transition-table" data-source="transitions" data-row-key="move">
+            <thead><tr><th data-field="from_group">From</th><th data-field="to_group">To</th><th data-field="changes">Leads moved</th><th data-field="share">Share</th></tr></thead>
+            <tbody data-draw="transition-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="gdx-two">
+        <div class="gdx-card" id="backlog">
+          <h3 class="gdx-note">Open leads now, by days since their status last changed</h3>
+          <ul class="gdx-legend">
+            <li><span class="gd-sw" data-group="Follow-up pending"></span>Follow-up pending</li>
+            <li><span class="gd-sw" data-group="Not reached"></span>Not reached</li>
+            <li><span class="gd-sw" data-group="Not called yet"></span>Not called yet</li>
+          </ul>
+          <div class="gdx-chart" data-draw="backlog" data-source="backlog_age"></div>
+          <p class="gdx-note">Before tracking began, "days" counts from the lead date.</p>
+        </div>
+        <div class="gdx-card" id="refollow-cols">
+          <h3 class="gdx-note">Outcome of re-follow-up calls already logged in the sheet (S.K and Bhanu Pratap columns)</h3>
+          <ul class="gdx-legend">
+            <li><span class="gd-sw" data-group="Visit / Booked"></span>Visit / booked</li>
+            <li><span class="gd-sw" data-group="Follow-up pending"></span>Follow-up</li>
+            <li><span class="gd-sw" data-group="Not reached"></span>Not reached</li>
+            <li><span class="gd-sw" data-group="Lost"></span>Lost</li>
+            <li><span class="gd-sw" data-group="Junk"></span>Junk</li>
+          </ul>
+          <div class="gdx-chart short" data-draw="refollow-mix" data-source="refollow_mix"></div>
+          <p class="gdx-note">All re-follow-up calls in those columns, whatever the period.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="gdx-sec" id="weekly-refollow">
+      <div class="gdx-sec-h"><h2><span>Weekly</span>Re-follow-ups week by week</h2></div>
+      <p class="gdx-sub">Weeks run Monday to Sunday. Status changes are counted in the week the refresh saw them, for the chosen source; the current week is still in progress. The period buttons above don't apply here.</p>
+      <div class="gdx-tiles">
+        <div class="gdx-card gdx-tile"><h3><span class="gdx-ico">⇄</span>Status changes this week</h3><div class="gdx-num" data-draw="val" data-source="wk_kpi" data-field="changes" data-row="0" data-fmt="int">—</div>
+          <div class="gdx-delta"><span class="gdx-pill" data-draw="wk-delta" data-field="changes" data-good="up">—</span><span>vs last week</span></div></div>
+        <div class="gdx-card gdx-tile"><h3><span class="gdx-ico">↑</span>Moved to visit or sale</h3><div class="gdx-num" data-draw="val" data-source="wk_kpi" data-field="to_booked" data-row="0" data-fmt="int">—</div>
+          <div class="gdx-delta"><span class="gdx-pill" data-draw="wk-delta" data-field="to_booked" data-good="up">—</span><span>vs last week</span></div></div>
+        <div class="gdx-card gdx-tile"><h3><span class="gdx-ico">↓</span>Moved to lost or junk</h3><div class="gdx-num" data-draw="val" data-source="wk_kpi" data-field="to_lost" data-row="0" data-fmt="int">—</div>
+          <div class="gdx-delta"><span class="gdx-pill" data-draw="wk-delta" data-field="to_lost" data-good="down">—</span><span>vs last week</span></div></div>
+        <div class="gdx-card gdx-tile"><h3><span class="gdx-ico">⏱</span>Open leads untouched 15+ days</h3><div class="gdx-num" data-draw="val" data-source="wk_kpi" data-field="stale_open" data-row="0" data-fmt="int">—</div>
+          <div class="gdx-delta"><span>right now, chosen source</span></div></div>
+      </div>
+      <p class="gdx-empty" id="wk-empty" hidden>Status tracking started on <span data-draw="val" data-source="info" data-field="tracking_since" data-row="0" data-fmt="date">—</span>. Weekly status changes fill in as the 4-hourly refreshes find leads whose status moved.</p>
+      <div class="gdx-two">
+        <div class="gdx-card">
+          <h3 class="gdx-note">Status changes per week, by where the lead moved to</h3>
+          <ul class="gdx-legend">
+            <li><span class="gd-sw" data-group="Visit / Booked"></span>To visit or sale</li>
+            <li><span class="gd-sw" data-group="Follow-up pending"></span>Still open</li>
+            <li><span class="gd-sw" data-group="Lost"></span>To lost or junk</li>
+          </ul>
+          <div class="gdx-chart" data-draw="wk-chart" data-source="wk_changes"></div>
+        </div>
+        <div class="gdx-card gdx-wrap">
+          <table class="gdx-table" id="wk-table" data-source="wk_changes" data-row-key="week">
+            <thead><tr><th data-field="week">Week of</th><th data-field="changes">Changes</th><th data-field="to_booked">→ Visit / sale</th><th data-field="to_lost">→ Lost / junk</th><th data-field="still_open">Still open</th><th data-field="win_rate">Visit / sale %</th></tr></thead>
+            <tbody data-draw="wk-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="gdx-card gdx-wrap">
+        <h3 class="gdx-note" style="margin-bottom:8px">Calling team: this week against last week</h3>
+        <table class="gdx-table" id="wk-caller-table" data-source="wk_callers" data-row-key="caller">
+          <thead><tr><th data-field="caller">Caller</th><th data-field="this_changes">Changes this week</th><th data-field="this_booked">→ Visit / sale</th><th data-field="last_changes">Changes last week</th><th data-field="last_booked">→ Visit / sale</th><th data-field="open_now">Open now</th><th data-field="stale_open">Untouched 15+ days</th></tr></thead>
+          <tbody data-draw="wk-caller-table"></tbody>
+        </table>
+      </div>
+      <div class="gdx-card">
+        <h3 class="gdx-note">Re-follow-up calls logged in the sheet (S.K and Bhanu Pratap columns), by the week the lead came in, last 10 weeks</h3>
+        <ul class="gdx-legend">
+          <li><span class="gd-sw" data-group="Sale"></span>Sale</li>
+          <li><span class="gd-sw" data-group="Visit / Booked"></span>Visit / booked</li>
+          <li><span class="gd-sw" data-group="Follow-up pending"></span>Follow-up</li>
+          <li><span class="gd-sw" data-group="Not reached"></span>Not reached</li>
+          <li><span class="gd-sw" data-group="Lost"></span>Lost</li>
+          <li><span class="gd-sw" data-group="Junk"></span>Junk</li>
+        </ul>
+        <div class="gdx-chart" data-draw="wk-refollow" data-source="wk_refollow"></div>
+        <p class="gdx-note">The sheet doesn't record the date of a re-follow-up call, so these are grouped by lead week. They cover all sources.</p>
+      </div>
+    </section>
+
+    <section class="gdx-sec" id="callers">
+      <div class="gdx-sec-h"><h2><span>Team</span>Calling team</h2></div>
+      <p class="gdx-sub">Leads assigned in the chosen period (all sources), and each caller's open leads right now. Red marks open leads untouched for 15+ days.</p>
+      <div class="gdx-card gdx-wrap">
+        <table class="gdx-table" id="caller-table" data-source="callers" data-row-key="caller">
+          <thead><tr>
+            <th data-field="caller">Caller</th><th data-field="leads">Leads</th><th data-field="contact_rate">Contact %</th>
+            <th data-field="booked">Visits + sales</th><th data-field="sales">Sales</th><th data-field="conv">Lead → sale %</th>
+            <th data-field="revenue_lakh">Sale value (₹ L)</th><th data-field="open_now">Open now</th><th data-field="stale_open">Untouched 15+ days</th>
+          </tr></thead>
+          <tbody data-draw="caller-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <details id="definitions">
+      <summary>How the numbers are worked out, and data checks</summary>
+      <dl>
+        <dt>Source</dt><dd>From the sheet's utm_medium: Google_Paid → Google Search, video → Google Video, demandgen → Google Demand Gen, Facebook → Meta. Spelling variants (Incoming, incom, INcoming…) are merged.</dd>
+        <dt>Sale</dt><dd>Result is Sale Confirmed. Sale value is the SaleAmount on those rows.</dd>
+        <dt>Visit / booked</dt><dd>Visit Confirmed, Booked for Estimate, Estimated, For Payment, Rescheduled.</dd>
+        <dt>Follow-up pending</dt><dd>Will Get Back, Followup, Call Back, Will Call Self.</dd>
+        <dt>Not reached</dt><dd>No Answer, Busy, Not Connected, Voice Mail, Hung Up.</dd>
+        <dt>Lost</dt><dd>Rate Issue, Done from someone else / already booked elsewhere, Not Required, Cancelled, Refused by Operations, Wants Today Only / No Slots, Language Barrier.</dd>
+        <dt>Junk</dt><dd>Duplicate, Not Catering, Wrong Location, Only Enquiry, Haven't Enquired, Wrong Enquiry, Wrong Number.</dd>
+        <dt>Contact rate</dt><dd>Leads with any status other than Not reached, divided by leads that have a status.</dd>
+        <dt>Status change</dt><dd>A lead whose Result moved from one status to another, compared with its status at the start of that day. Several edits to one lead in a day count as one move.</dd>
+        <dt>Privacy</dt><dd>The dashboard holds counts only, no names or phone numbers.</dd>
+      </dl>
+      <div class="gdx-wrap">
+        <table class="gdx-table" id="quality-table" data-source="quality" data-row-key="check">
+          <thead><tr><th data-field="check">Data check</th><th data-field="rows">Leads</th></tr></thead>
+          <tbody data-draw="quality-table"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</div>
+</div>
+</div>
+<script src="d3.min.js"></script>
+<script src="shim.js"></script>
+<script>
+// ---------- worked-out figures ----------
+dash.calc('kpi', {
+  inputs: ['by_source'],
+  title: 'Headline figures',
+  description: 'Leads, contact rate, bookings, sales and sale value for the chosen period and source, with the change against the period just before it.',
+  fn: (by_source) => {
+    const p = dash.params();
+    const n = p.range === 'all' ? null : Number(p.range);
+    const PAID = new Set(['Google Search', 'Google Video', 'Google Demand Gen', 'Meta']);
+    const pick = (c) => !p.channel || (p.channel === 'paid' ? PAID.has(c) : p.channel === 'google' ? c.startsWith('Google') : c === p.channel);
+    const end = d3.max(by_source, (r) => r.date);
+    if (!end) return [];
+    const back = (iso, k) => new Date(Date.parse(iso + 'T00:00:00Z') - k * 864e5).toISOString().slice(0, 10);
+    const total = (from, to) => {
+      const t = {leads: 0, called: 0, reached: 0, booked: 0, sales: 0, revenue: 0};
+      for (const r of by_source) {
+        if (r.date < from || r.date > to || !pick(r.channel)) continue;
+        t.leads += r.leads;
+        if (r.group !== 'Not called yet') t.called += r.leads;
+        if (r.group !== 'Not called yet' && r.group !== 'Not reached') t.reached += r.leads;
+        if (r.group === 'Sale' || r.group === 'Visit / Booked') t.booked += r.leads;
+        if (r.group === 'Sale') { t.sales += r.leads; t.revenue += r.revenue; }
+      }
+      return t;
+    };
+    const from = n ? back(end, n - 1) : '0000-00-00';
+    const cur = total(from, end);
+    const prev = n ? total(back(end, 2 * n - 1), back(end, n)) : null;
+    const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : null);
+    const chg = (a, b) => (prev && b ? Math.round(((a - b) / b) * 100) : null);
+    const pts = (a, b) => (prev && a != null && b != null ? Math.round((a - b) * 10) / 10 : null);
+    const conv = pct(cur.sales, cur.leads), contact = pct(cur.reached, cur.called);
+    return [{
+      from, to: end, leads: cur.leads, contact_rate: contact, booked: cur.booked, sales: cur.sales, conv,
+      revenue_lakh: Math.round(cur.revenue / 1000) / 100,
+      leads_chg: chg(cur.leads, prev && prev.leads), booked_chg: chg(cur.booked, prev && prev.booked),
+      sales_chg: chg(cur.sales, prev && prev.sales), revenue_chg: chg(cur.revenue, prev && prev.revenue),
+      conv_chg_pts: pts(conv, prev && pct(prev.sales, prev.leads)),
+      contact_chg_pts: pts(contact, prev && pct(prev.reached, prev.called)),
+    }];
+  },
+});
+
+dash.calc('by_channel', {
+  inputs: ['by_source'],
+  title: 'Results by source',
+  description: 'For the chosen period, every source: leads, contact rate, bookings, sales, conversion, sale value, junk and repeat share.',
+  fn: (by_source) => {
+    const p = dash.params();
+    const n = p.range === 'all' ? null : Number(p.range);
+    const end = d3.max(by_source, (r) => r.date);
+    if (!end) return [];
+    const from = n ? new Date(Date.parse(end + 'T00:00:00Z') - (n - 1) * 864e5).toISOString().slice(0, 10) : '0000-00-00';
+    const acc = new Map();
+    const add = (key, r) => {
+      if (!acc.has(key)) acc.set(key, {channel: key, leads: 0, called: 0, reached: 0, booked: 0, sales: 0, revenue: 0, junk: 0, repeat: 0});
+      const t = acc.get(key);
+      t.leads += r.leads; t.repeat += r.repeat_leads;
+      if (r.group !== 'Not called yet') t.called += r.leads;
+      if (r.group !== 'Not called yet' && r.group !== 'Not reached') t.reached += r.leads;
+      if (r.group === 'Sale' || r.group === 'Visit / Booked') t.booked += r.leads;
+      if (r.group === 'Sale') { t.sales += r.leads; t.revenue += r.revenue; }
+      if (r.group === 'Junk') t.junk += r.leads;
+    };
+    for (const r of by_source) {
+      if (r.date < from || r.date > end) continue;
+      add(r.channel, r); add('All sources', r);
+    }
+    const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : null);
+    return [...acc.values()]
+      .map((t) => ({channel: t.channel, leads: t.leads, contact_rate: pct(t.reached, t.called), booked: t.booked, sales: t.sales,
+        conv: pct(t.sales, t.leads), revenue_lakh: Math.round(t.revenue / 1000) / 100, junk_rate: pct(t.junk, t.leads), repeat_rate: pct(t.repeat, t.leads)}))
+      .sort((a, b) => (a.channel === 'All sources') - (b.channel === 'All sources') || b.leads - a.leads);
+  },
+});
+
+dash.calc('headline', {
+  inputs: ['by_channel'],
+  title: 'Best paid source',
+  description: 'The paid source (Google or Meta) with the highest lead-to-sale rate among those with at least 30 leads, and the source with the most leads, in the chosen period.',
+  fn: (by_channel) => {
+    const PAID = new Set(['Google Search', 'Google Video', 'Google Demand Gen', 'Meta']);
+    const rows = (by_channel || []).filter((r) => r.channel !== 'All sources');
+    const paid = rows.filter((r) => PAID.has(r.channel) && r.leads >= 30).sort((a, b) => b.conv - a.conv);
+    const top = rows.slice().sort((a, b) => b.leads - a.leads)[0];
+    return [{best_paid: paid[0] ? paid[0].channel : 'none yet', best_paid_conv: paid[0] ? paid[0].conv : null, top_volume: top ? top.channel : 'none'}];
+  },
+});
+
+dash.calc('weekly', {
+  inputs: ['by_source'],
+  title: 'Leads and sales per week',
+  description: 'Every week in the sheet (weeks start Monday), for the chosen source, split into Google Ads, Meta Ads and non-paid sources. Sales are counted in the week the lead came in.',
+  fn: (by_source) => {
+    const p = dash.params();
+    const PAID = new Set(['Google Search', 'Google Video', 'Google Demand Gen', 'Meta']);
+    const pick = (c) => !p.channel || (p.channel === 'paid' ? PAID.has(c) : p.channel === 'google' ? c.startsWith('Google') : c === p.channel);
+    const platform = (c) => (c.startsWith('Google') ? 'Google Ads' : c === 'Meta' ? 'Meta Ads' : 'Non-paid');
+    const acc = new Map();
+    for (const r of by_source) {
+      if (!pick(r.channel)) continue;
+      const d = new Date(r.date + 'T00:00:00Z');
+      const week = new Date(d - ((d.getUTCDay() + 6) % 7) * 864e5).toISOString().slice(0, 10);
+      const key = week + '|' + platform(r.channel);
+      if (!acc.has(key)) acc.set(key, {week, platform: platform(r.channel), leads: 0, sales: 0});
+      const t = acc.get(key);
+      t.leads += r.leads;
+      if (r.group === 'Sale') t.sales += r.leads;
+    }
+    return [...acc.values()].sort((a, b) => (a.week < b.week ? -1 : a.week > b.week ? 1 : 0));
+  },
+});
+
+dash.calc('status_mix', {
+  inputs: ['by_source'],
+  title: 'Current status by source',
+  description: 'For leads from the chosen period, how many of each source sit in each status group today.',
+  fn: (by_source) => {
+    const p = dash.params();
+    const n = p.range === 'all' ? null : Number(p.range);
+    const end = d3.max(by_source, (r) => r.date);
+    if (!end) return [];
+    const from = n ? new Date(Date.parse(end + 'T00:00:00Z') - (n - 1) * 864e5).toISOString().slice(0, 10) : '0000-00-00';
+    const acc = new Map(), tot = new Map();
+    for (const r of by_source) {
+      if (r.date < from || r.date > end || r.channel === 'Unknown') continue;
+      const key = r.channel + '|' + r.group;
+      acc.set(key, (acc.get(key) || 0) + r.leads);
+      tot.set(r.channel, (tot.get(r.channel) || 0) + r.leads);
+    }
+    return [...acc.entries()].map(([k, v]) => {
+      const [channel, group] = k.split('|');
+      return {channel, group, leads: v, share: Math.round((v / tot.get(channel)) * 1000) / 10, channel_leads: tot.get(channel)};
+    });
+  },
+});
+
+dash.calc('change_kpi', {
+  inputs: ['changes'],
+  title: 'Status changes summary',
+  description: 'Status changes seen by the daily refresh in the chosen period and source, and where they went.',
+  fn: (changes) => {
+    const p = dash.params();
+    const n = p.range === 'all' ? null : Number(p.range);
+    const PAID = new Set(['Google Search', 'Google Video', 'Google Demand Gen', 'Meta']);
+    const pick = (c) => !p.channel || (p.channel === 'paid' ? PAID.has(c) : p.channel === 'google' ? c.startsWith('Google') : c === p.channel);
+    const end = d3.max(changes, (r) => r.observed);
+    const from = end && n ? new Date(Date.parse(end + 'T00:00:00Z') - (n - 1) * 864e5).toISOString().slice(0, 10) : '0000-00-00';
+    const t = {changes: 0, to_booked: 0, to_lost: 0, still_open: 0};
+    const WON = new Set(['Sale', 'Visit / Booked']), GONE = new Set(['Lost', 'Junk']);
+    for (const r of changes) {
+      if (r.observed < from || !pick(r.channel)) continue;
+      t.changes += r.changes;
+      if (WON.has(r.to_group) && !WON.has(r.from_group)) t.to_booked += r.changes;
+      else if (GONE.has(r.to_group)) t.to_lost += r.changes;
+      else if (!WON.has(r.to_group)) t.still_open += r.changes;
+    }
+    return [t];
+  },
+});
+
+dash.calc('transitions', {
+  inputs: ['changes'],
+  title: 'Status moves',
+  description: 'Status changes in the chosen period and source, grouped by the status group a lead moved from and to.',
+  fn: (changes) => {
+    const p = dash.params();
+    const n = p.range === 'all' ? null : Number(p.range);
+    const PAID = new Set(['Google Search', 'Google Video', 'Google Demand Gen', 'Meta']);
+    const pick = (c) => !p.channel || (p.channel === 'paid' ? PAID.has(c) : p.channel === 'google' ? c.startsWith('Google') : c === p.channel);
+    const end = d3.max(changes, (r) => r.observed);
+    const from = end && n ? new Date(Date.parse(end + 'T00:00:00Z') - (n - 1) * 864e5).toISOString().slice(0, 10) : '0000-00-00';
+    const acc = new Map();
+    let all = 0;
+    for (const r of changes) {
+      if (r.observed < from || !pick(r.channel)) continue;
+      const move = r.from_group + ' → ' + r.to_group;
+      if (!acc.has(move)) acc.set(move, {move, from_group: r.from_group, to_group: r.to_group, changes: 0});
+      acc.get(move).changes += r.changes;
+      all += r.changes;
+    }
+    return [...acc.values()].map((t) => ({...t, share: Math.round((t.changes / all) * 1000) / 10})).sort((a, b) => b.changes - a.changes);
+  },
+});
+
+dash.calc('backlog_age', {
+  inputs: ['backlog'],
+  title: 'Open leads by time since last change',
+  description: 'Leads open right now (follow-up pending, not reached, not called yet) for the chosen source, by days since their status last changed.',
+  fn: (backlog) => {
+    const p = dash.params();
+    const PAID = new Set(['Google Search', 'Google Video', 'Google Demand Gen', 'Meta']);
+    const pick = (c) => !p.channel || (p.channel === 'paid' ? PAID.has(c) : p.channel === 'google' ? c.startsWith('Google') : c === p.channel);
+    const acc = new Map();
+    for (const r of backlog) {
+      if (!pick(r.channel)) continue;
+      const key = r.age + '|' + r.group;
+      acc.set(key, (acc.get(key) || 0) + r.leads);
+    }
+    return [...acc.entries()].map(([k, v]) => ({age: k.split('|')[0], group: k.split('|')[1], leads: v}));
+  },
+});
+
+dash.calc('refollow_mix', {
+  inputs: ['refollow'],
+  title: 'Re-follow-up call outcomes',
+  description: 'Outcomes written in the sheet\'s S.K Remarks and Bhanu Pratap columns, by caller and outcome group.',
+  fn: (refollow) => {
+    const acc = new Map(), tot = new Map();
+    for (const r of refollow) {
+      const g = r.outcome_group === 'Unmapped' ? 'Follow-up pending' : r.outcome_group;
+      const key = r.recaller + '|' + g;
+      acc.set(key, (acc.get(key) || 0) + r.calls);
+      tot.set(r.recaller, (tot.get(r.recaller) || 0) + r.calls);
+    }
+    return [...acc.entries()].map(([k, v]) => {
+      const [recaller, outcome_group] = k.split('|');
+      return {recaller, outcome_group, calls: v, share: Math.round((v / tot.get(recaller)) * 1000) / 10, recaller_calls: tot.get(recaller)};
+    });
+  },
+});
+
+dash.calc('callers', {
+  inputs: ['by_caller', 'backlog'],
+  title: 'Results by caller',
+  description: 'Leads assigned to each caller in the chosen period with their results, and their open leads right now.',
+  fn: (by_caller, backlog) => {
+    const p = dash.params();
+    const n = p.range === 'all' ? null : Number(p.range);
+    const end = d3.max(by_caller, (r) => r.date);
+    if (!end) return [];
+    const from = n ? new Date(Date.parse(end + 'T00:00:00Z') - (n - 1) * 864e5).toISOString().slice(0, 10) : '0000-00-00';
+    const acc = new Map();
+    const get = (c) => {
+      if (!acc.has(c)) acc.set(c, {caller: c, leads: 0, called: 0, reached: 0, booked: 0, sales: 0, revenue: 0, open_now: 0, stale_open: 0});
+      return acc.get(c);
+    };
+    for (const r of by_caller) {
+      if (r.date < from || r.date > end) continue;
+      const t = get(r.caller);
+      t.leads += r.leads;
+      if (r.group !== 'Not called yet') t.called += r.leads;
+      if (r.group !== 'Not called yet' && r.group !== 'Not reached') t.reached += r.leads;
+      if (r.group === 'Sale' || r.group === 'Visit / Booked') t.booked += r.leads;
+      if (r.group === 'Sale') { t.sales += r.leads; t.revenue += r.revenue; }
+    }
+    for (const r of backlog) {
+      const t = get(r.caller);
+      t.open_now += r.leads;
+      if (r.age === '15-30 days' || r.age === '30+ days') t.stale_open += r.leads;
+    }
+    const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : null);
+    return [...acc.values()]
+      .map((t) => ({caller: t.caller, leads: t.leads, contact_rate: pct(t.reached, t.called), booked: t.booked, sales: t.sales,
+        conv: pct(t.sales, t.leads), revenue_lakh: Math.round(t.revenue / 1000) / 100, open_now: t.open_now, stale_open: t.stale_open}))
+      .sort((a, b) => b.leads - a.leads || b.open_now - a.open_now);
+  },
+});
+
+// ---------- weekly re-follow-up view ----------
+const gdWeekOf = (iso) => { const d = new Date(iso + 'T00:00:00Z'); return new Date(d - ((d.getUTCDay() + 6) % 7) * 864e5).toISOString().slice(0, 10); };
+const gdPick = () => {
+  const p = dash.params();
+  const PAID = new Set(['Google Search', 'Google Video', 'Google Demand Gen', 'Meta']);
+  return (c) => !p.channel || (p.channel === 'paid' ? PAID.has(c) : p.channel === 'google' ? c.startsWith('Google') : c === p.channel);
+};
+const gdMoveKind = (r) => {
+  const WON = new Set(['Sale', 'Visit / Booked']), GONE = new Set(['Lost', 'Junk']);
+  if (WON.has(r.to_group) && !WON.has(r.from_group)) return 'to_booked';
+  if (GONE.has(r.to_group)) return 'to_lost';
+  if (!WON.has(r.to_group)) return 'still_open';
+  return 'other';
+};
+const gdThisWeek = (info) => gdWeekOf((info && info[0] && info[0].refreshed) || new Date().toISOString().slice(0, 10));
+const gdPrevWeek = (wk) => new Date(Date.parse(wk + 'T00:00:00Z') - 7 * 864e5).toISOString().slice(0, 10);
+
+dash.calc('wk_changes', {
+  inputs: ['changes', 'info'],
+  title: 'Status changes per week',
+  description: 'Status changes seen by the refresh, grouped by the Monday-start week they were seen in, for the chosen source: total, moved to visit or sale, moved to lost or junk, still open. Weeks since tracking began, newest first.',
+  fn: (changes, info) => {
+    const pick = gdPick();
+    const start = gdWeekOf((info && info[0] && info[0].tracking_since) || gdThisWeek(info));
+    const acc = new Map();
+    for (let w = gdThisWeek(info); w >= start; w = gdPrevWeek(w)) acc.set(w, {week: w, changes: 0, to_booked: 0, to_lost: 0, still_open: 0});
+    for (const r of changes) {
+      if (!pick(r.channel)) continue;
+      const t = acc.get(gdWeekOf(r.observed));
+      if (!t) continue;
+      t.changes += r.changes;
+      const k = gdMoveKind(r);
+      if (k !== 'other') t[k] += r.changes;
+    }
+    return [...acc.values()].map((t) => ({...t, win_rate: t.changes ? Math.round((t.to_booked / t.changes) * 1000) / 10 : null}));
+  },
+});
+
+dash.calc('wk_kpi', {
+  inputs: ['wk_changes', 'backlog'],
+  title: 'This week vs last week',
+  description: 'Status changes this week and last week for the chosen source, and open leads with no status change for 15 days or more.',
+  fn: (wk, backlog) => {
+    const pick = gdPick();
+    const z = {changes: 0, to_booked: 0, to_lost: 0};
+    const cur = wk[0] || z, prev = wk[1] || null;
+    let stale = 0;
+    for (const r of backlog) if (pick(r.channel) && (r.age === '15-30 days' || r.age === '30+ days')) stale += r.leads;
+    return [{changes: cur.changes, to_booked: cur.to_booked, to_lost: cur.to_lost, stale_open: stale,
+      prev_changes: prev ? prev.changes : null, prev_to_booked: prev ? prev.to_booked : null, prev_to_lost: prev ? prev.to_lost : null}];
+  },
+});
+
+dash.calc('wk_callers', {
+  inputs: ['changes', 'backlog', 'info'],
+  title: 'Callers this week vs last week',
+  description: 'For each caller, status changes on their leads this week and last week (and how many moved to visit or sale), plus their open leads now and those untouched for 15+ days, for the chosen source.',
+  fn: (changes, backlog, info) => {
+    const pick = gdPick();
+    const tw = gdThisWeek(info), lw = gdPrevWeek(tw);
+    const acc = new Map();
+    const get = (c) => { if (!acc.has(c)) acc.set(c, {caller: c, this_changes: 0, this_booked: 0, last_changes: 0, last_booked: 0, open_now: 0, stale_open: 0}); return acc.get(c); };
+    for (const r of changes) {
+      if (!pick(r.channel)) continue;
+      const w = gdWeekOf(r.observed);
+      if (w !== tw && w !== lw) continue;
+      const t = get(r.caller), pre = w === tw ? 'this_' : 'last_';
+      t[pre + 'changes'] += r.changes;
+      if (gdMoveKind(r) === 'to_booked') t[pre + 'booked'] += r.changes;
+    }
+    for (const r of backlog) {
+      if (!pick(r.channel)) continue;
+      const t = get(r.caller);
+      t.open_now += r.leads;
+      if (r.age === '15-30 days' || r.age === '30+ days') t.stale_open += r.leads;
+    }
+    return [...acc.values()].sort((a, b) => b.this_changes - a.this_changes || b.stale_open - a.stale_open);
+  },
+});
+
+dash.calc('wk_refollow', {
+  inputs: ['refollow'],
+  title: 'Logged re-follow-up calls per week',
+  description: 'Re-follow-up calls written in the S.K Remarks and Bhanu Pratap columns, by the Monday-start week the lead came in and outcome group, last 10 weeks.',
+  fn: (refollow) => {
+    const weeks = [...new Set(refollow.map((r) => r.lead_week))].sort().slice(-10);
+    const keep = new Set(weeks), acc = new Map();
+    for (const r of refollow) {
+      if (!keep.has(r.lead_week)) continue;
+      const g = r.outcome_group === 'Unmapped' || r.outcome_group === 'Not called yet' ? 'Follow-up pending' : r.outcome_group;
+      const key = r.lead_week + '|' + g;
+      acc.set(key, (acc.get(key) || 0) + r.calls);
+    }
+    return [...acc.entries()].map(([k, v]) => ({week: k.split('|')[0], outcome_group: k.split('|')[1], calls: v}));
+  },
+});
+</script>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
