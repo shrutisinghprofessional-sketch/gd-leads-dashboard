@@ -20,7 +20,8 @@
   .gdl-card { width: 100%; max-width: 380px; background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 20px 60px rgba(6,26,58,.35); box-sizing: border-box; }
   .gdl-brand { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #5B6B82; margin: 0 0 8px; }
   .gdl-brand .gdx-drop { box-shadow: none; background: linear-gradient(135deg, #379EFF, #2E4DB5); }
-  .gdl h1 { font-family: Jost, var(--font-anthropic-sans); font-size: 26px; color: #061A3A; margin: 0 0 20px; font-weight: 600; }
+  .gdl-logo { display: block; width: 150px; height: auto; margin: 0 auto 14px; border-radius: 14px; }
+  .gdl h1 { text-align: center; font-family: Jost, var(--font-anthropic-sans); font-size: 26px; color: #061A3A; margin: 0 0 20px; font-weight: 600; }
   .gdl label { display: block; font-size: 13px; color: #5B6B82; margin: 0 0 6px; }
   .gdl input { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; padding: 11px 12px; border: 1px solid #DCE9F7; border-radius: 12px; margin: 0 0 14px; color: #0F2340; }
   .gdl input:focus { outline: 2px solid #379EFF; border-color: transparent; }
@@ -116,7 +117,7 @@
 <body>
 <main class="gdl" id="login">
   <form class="gdl-card" id="login-form" autocomplete="on">
-    <p class="gdl-brand"><span class="gdx-drop"></span>GD Water Consult</p>
+    <img class="gdl-logo" src="logo.jpg" alt="GD Water Consult">
     <h1>Leads Dashboard</h1>
     <label for="login-user">Username</label>
     <input id="login-user" name="username" autocomplete="username" required autofocus>
