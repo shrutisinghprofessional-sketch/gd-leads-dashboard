@@ -208,7 +208,7 @@ window.gdFlow = (el, rows) => {
 // ---------- controls ----------
 const gdSyncControls = () => {
   const p = dash.params();
-  for (const b of document.querySelectorAll('.gdx-seg button[data-range]')) b.classList.toggle('on', b.dataset.range === (p.range || '15'));
+  for (const b of document.querySelectorAll('.gdx-seg button[data-range]')) b.classList.toggle('on', b.dataset.range === (p.range || '35'));
   for (const b of document.querySelectorAll('.gdx-mtog button[data-metric]')) b.classList.toggle('on', b.dataset.metric === (p.metric || 'leads'));
   for (const s of document.querySelectorAll('#f-channel')) if (document.activeElement !== s) s.value = p.channel || '';
 };

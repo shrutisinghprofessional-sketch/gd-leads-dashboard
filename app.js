@@ -1,6 +1,6 @@
 // Login + decryption. The data file is encrypted; only the right username and password unlock it.
 (function () {
-  const DEFAULT_PARAMS = {channel: '', metric: 'leads', range: '15'};
+  const DEFAULT_PARAMS = {channel: '', metric: 'leads', range: '35'};
   const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
   const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
   const $ = (id) => document.getElementById(id);
